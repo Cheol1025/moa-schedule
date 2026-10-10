@@ -194,16 +194,16 @@ body:has(dialog[open]){overflow:hidden}
 @media(max-height:860px) and (min-width:761px){.quiet-card{display:none}.workspace{margin:22px 0 18px}.sidebar-projects{margin-top:16px;padding-top:16px}.sidebar-bottom{padding-top:16px}}
 @media(max-height:700px) and (min-width:761px){.workspace{display:none}.nav-item{padding:10px 14px}}
 /* social screens: the page header gets out of the way */
-body[data-view=profile] .page-heading,body[data-view=board] .page-heading{display:none}
-body[data-view=board] .page-heading,body[data-view=admin] .page-heading{margin-bottom:18px}
-body[data-view=board] .eyebrow,body[data-view=admin] .eyebrow,body[data-view=board] #pageSubtitle,body[data-view=admin] #pageSubtitle{display:none}
-body[data-view=board] h1,body[data-view=admin] h1{font-size:22px}
-body[data-view=board] .page,body[data-view=admin] .page,body[data-view=profile] .page{padding-top:18px}
-body[data-view=profile] .profile-head{padding-top:4px}
+body[data-screen=profile] .page-heading,body[data-screen=board] .page-heading{display:none}
+body[data-screen=board] .page-heading,body[data-screen=admin] .page-heading{margin-bottom:18px}
+body[data-screen=board] .eyebrow,body[data-screen=admin] .eyebrow,body[data-screen=board] #pageSubtitle,body[data-screen=admin] #pageSubtitle{display:none}
+body[data-screen=board] h1,body[data-screen=admin] h1{font-size:22px}
+body[data-screen=board] .page,body[data-screen=admin] .page,body[data-screen=profile] .page{padding-top:18px}
+body[data-screen=profile] .profile-head{padding-top:4px}
 @media(max-height:700px) and (min-width:761px){.brand{margin-bottom:24px}}
 /* no page header on any screen; the add button lives in the top bar (floating on phones) */
 .page-heading{display:none!important}
 .page{padding-top:8px!important}
 .page-actions{display:flex;justify-content:flex-end;margin:0 0 16px}
-body[data-view=board] .page-actions,body[data-view=profile] .page-actions{display:none}
+body[data-screen=board] .page-actions,body[data-screen=profile] .page-actions{display:none}
 @media(max-width:760px){.page-actions{margin:0}.page-actions #mainAdd{position:fixed;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));width:58px;height:58px;padding:0;border-radius:50%;font-size:0;gap:0;z-index:60;box-shadow:0 10px 24px #3a74b955}.page-actions #mainAdd svg.ico{width:24px;height:24px}.page{padding-bottom:90px}}
