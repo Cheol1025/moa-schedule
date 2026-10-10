@@ -43,7 +43,7 @@ function render(){
  $('#projectNav').innerHTML=vd.projects.filter(p=>p.status!=='done').slice(0,7).map(p=>`<button class="project-nav" data-action="project-tasks" data-id="${esc(p.id)}"><span class="project-dot" style="background:${esc(p.color)}"></span><span>${esc(p.title)}</span></button>`).join('')||'<p class="empty-nav">새로운 프로젝트를 추가하고<br>할 일을 하나씩 모아보세요.</p>';
  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
  const title={calendar:'나의 캘린더',year:'한 해를 한눈에',projects:'나의 프로젝트',tasks:'작은 일부터 하나씩',board:'함께 나누는 이야기',profile:'프로필',admin:'관리자'}[view];
- $('#pageTitle').innerHTML=title+'<span class="title-dot">.</span>';$('#crumb').textContent={calendar:'캘린더',year:'연간 보기',projects:'프로젝트',tasks:'할 일',board:'게시판',profile:'프로필',admin:'관리'}[view];
+ $('#pageTitle').innerHTML=title+'<span class="title-dot">.</span>';$('#crumb').textContent={calendar:'캘린더',year:'연간 보기',projects:'프로젝트',tasks:'할 일',board:'피드',profile:'프로필',admin:'관리'}[view];
  $('#pageSubtitle').textContent={calendar:'하고 싶은 일과 해야 할 일, 한눈에 모아보세요.',year:'월을 눌러 상세 일정을 확인하세요. 연도는 자유롭게 바꿀 수 있어요.',projects:'목표부터 결과물까지, 나의 프로젝트를 이어가세요.',tasks:'아이디어를 모으고, 시작하고, 차근차근 마무리해요.',board:'사진과 파일, 소식을 함께 나눠요.',profile:'올린 사진을 한눈에 모아봐요.',admin:'멤버를 초대하고 그룹을 만들어 일정을 함께 나눠요.'}[view];
  const action={projects:'new-project',tasks:'new-task',board:'focus-composer',profile:'focus-composer',admin:'new-group'}[view]||'new-event';$('#mainAdd').dataset.action=action;$('#mainAdd').innerHTML=icon('plus')+{projects:'프로젝트 추가',tasks:'할 일 추가',calendar:'일정 추가',year:'일정 추가',board:'글 쓰기',profile:'글 쓰기',admin:'그룹 만들기'}[view];
  const currentToday=today();const active=vd.tasks.filter(t=>!['done','cancelled'].includes(t.status));

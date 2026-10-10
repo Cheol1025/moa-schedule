@@ -194,7 +194,7 @@ body:has(dialog[open]){overflow:hidden}
 @media(max-height:860px) and (min-width:761px){.quiet-card{display:none}.workspace{margin:22px 0 18px}.sidebar-projects{margin-top:16px;padding-top:16px}.sidebar-bottom{padding-top:16px}}
 @media(max-height:700px) and (min-width:761px){.workspace{display:none}.nav-item{padding:10px 14px}}
 /* social screens: the page header gets out of the way */
-body[data-view=profile] .page-heading{display:none}
+body[data-view=profile] .page-heading,body[data-view=board] .page-heading{display:none}
 body[data-view=board] .page-heading,body[data-view=admin] .page-heading{margin-bottom:18px}
 body[data-view=board] .eyebrow,body[data-view=admin] .eyebrow,body[data-view=board] #pageSubtitle,body[data-view=admin] #pageSubtitle{display:none}
 body[data-view=board] h1,body[data-view=admin] h1{font-size:22px}
