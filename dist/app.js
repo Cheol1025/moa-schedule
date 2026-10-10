@@ -38,7 +38,7 @@ function eventsOn(key){return vd.events.filter(e=>C.occurs(e,key)&&matches(e)).s
 function tasksOn(key){return vd.tasks.filter(t=>(t.due===key||t.start===key)&&t.status!=='cancelled'&&matches(t));}
 function fillIcons(root=document){root.querySelectorAll('[data-icon]').forEach(n=>{n.innerHTML=icon(n.dataset.icon);});}
 function render(){
- visibleData();const social=['board','profile','admin'].includes(view);$('#stats').hidden=social;
+ visibleData();const social=['board','profile','admin'].includes(view);document.body.dataset.view=view;$('#stats').hidden=social;
  $('#projectCount').textContent=vd.projects.filter(p=>p.status!=='done').length;$('#taskCount').textContent=vd.tasks.filter(t=>!['done','cancelled'].includes(t.status)).length;
  $('#projectNav').innerHTML=vd.projects.filter(p=>p.status!=='done').slice(0,7).map(p=>`<button class="project-nav" data-action="project-tasks" data-id="${esc(p.id)}"><span class="project-dot" style="background:${esc(p.color)}"></span><span>${esc(p.title)}</span></button>`).join('')||'<p class="empty-nav">새로운 프로젝트를 추가하고<br>할 일을 하나씩 모아보세요.</p>';
  document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
