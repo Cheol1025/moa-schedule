@@ -207,3 +207,28 @@ body[data-screen=profile] .profile-head{padding-top:4px}
 .page-actions{display:flex;justify-content:flex-end;margin:0 0 16px}
 body[data-screen=board] .page-actions,body[data-screen=profile] .page-actions{display:none}
 @media(max-width:760px){.page-actions{margin:0}.page-actions #mainAdd{position:fixed;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));width:58px;height:58px;padding:0;border-radius:50%;font-size:0;gap:0;z-index:60;box-shadow:0 10px 24px #3a74b955}.page-actions #mainAdd svg.ico{width:24px;height:24px}.page{padding-bottom:90px}}
+/* task board drag and drop */
+.task-card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;touch-action:manipulation;transition:transform .15s,box-shadow .15s}
+.task-card .agenda-title{cursor:grab}
+.drag-ghost{position:fixed;left:0;top:0;margin:0;z-index:300;pointer-events:none;cursor:grabbing;box-shadow:0 22px 44px #1d2b4033!important;transition:none!important}
+.drag-source{display:none}
+.drop-placeholder{border:2px dashed #8db6ec;border-radius:18px;background:#eef5fecc;margin-bottom:10px}
+.task-column{transition:background .15s,box-shadow .15s}
+.task-column.drop-target{background:#e6f0fdcc;box-shadow:inset 0 0 0 2px #8db6ec88}
+body.dragging-task,body.dragging-task *{cursor:grabbing!important}
+body.dragging-task .column-empty{display:none}
+/* long titles end with … everywhere; the detail modal shows the full text */
+.agenda-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+.agenda-meta,.task-project,.post-author b,.member-list b,.project-progress-meta span,.task-due,.mini-month h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-card h3,.project-card h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.task-card .agenda-title{white-space:normal}
+.post-text{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}.post-modal .post-text{display:block}
+.task-card-bottom{min-width:0}.task-card-bottom>*{min-width:0}
+/* task detail */
+.detail-head{display:flex;flex-direction:column;gap:8px;min-width:0}.detail-head .badge{align-self:flex-start}
+.detail-title{font-size:19px;margin:0;line-height:1.45;overflow-wrap:anywhere}
+.detail-list{margin:0;display:grid;gap:2px}.detail-list>div{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.detail-list dt{font-size:12px;color:#8b97a8}.detail-list dd{margin:0;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;overflow-wrap:anywhere}
+.detail-label{font-size:12px;color:#8b97a8;margin:18px 0 8px}
+.detail-notes{background:#f6f9fe;border-radius:16px;padding:14px 16px;font-size:13px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;min-height:60px}.detail-notes .muted{color:#a3adbb}
+.badge.status-doing{background:#e3eefc;color:#3f6fae}.badge.status-done{background:#def5ec;color:#3f8a6e}.badge.status-waiting{background:#fff1dd;color:#b9822e}.badge.status-cancelled{background:#f1f2f5;color:#8b93a1}
