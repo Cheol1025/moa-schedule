@@ -157,7 +157,6 @@ document.addEventListener('click',e=>{
  else if(a==='export')exportData();
  else if(a==='import'){$('#importFile').value='';$('#importFile').click();}
 });
-document.addEventListener('mousedown',e=>{if(e.target instanceof HTMLDialogElement&&e.target.open){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
 document.addEventListener('change',e=>{
  if(e.target.name==='mode'&&e.target.form)e.target.form.dataset.mode=e.target.value;
  if(e.target.id==='yearInput')applyYear(e.target);
