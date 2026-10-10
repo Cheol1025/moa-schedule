@@ -6,13 +6,17 @@
  function parse(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const [y,m,d]=s.split('-').map(Number);if(y<1||y>9999||m<1||m>12||d<1||d>31)return null;const a=date(y,m-1,d);return iso(a)===s?a:null;}
  const days=(y,m)=>date(y,m+1,0).getDate();
  function grid(y,m){const first=date(y,m);const offset=(first.getDay()+6)%7;return Array.from({length:42},(_,i)=>{const d=date(y,m,i-offset+1);return {key:iso(d),day:d.getDate(),current:d.getMonth()===m&&d.getFullYear()===y,weekday:d.getDay()};});}
- function occurs(e,key){const d=parse(key),s=parse(e.date);if(!d||!s||key<e.date||(e.until&&key>e.until)||(e.exceptions||[]).includes(key))return false;
+ function startsOn(e,key){const d=parse(key),s=parse(e.date);if(!d||!s||key<e.date||(e.until&&key>e.until)||(e.exceptions||[]).includes(key))return false;
  if(!e.repeat||e.repeat==='none')return key===e.date;
  if(e.repeat==='daily')return true;
  if(e.repeat==='weekly')return d.getDay()===s.getDay();
  if(e.repeat==='monthly')return d.getDate()===s.getDate();
  if(e.repeat==='lunarYearly'){const a=lunar(key),b=lunar(e.date);return !!a&&!!b&&!a.leap&&a.month===b.month&&a.day===b.day;}
  return e.repeat==='yearly'&&d.getDate()===s.getDate()&&d.getMonth()===s.getMonth();}
+ // Multi-day events (endDate) cover every day from each start occurrence through the same span.
+ const addDays=(k,n)=>{const a=parse(k);a.setDate(a.getDate()+n);return iso(a);};
+ const span=e=>e.endDate?Math.round((parse(e.endDate)-parse(e.date))/86400000):0;
+ function occurs(e,key){const n=span(e);if(!n)return startsOn(e,key);if(!parse(key))return false;for(let i=0;i<=n;i++)if(startsOn(e,addDays(key,-i)))return true;return false;}
  // Korean lunar calendar via Intl ('dangi'; falls back to 'chinese' where dangi is missing).
  let lunarFmt=null;const lunarCache=new Map();
  function lunar(key){if(lunarCache.has(key))return lunarCache.get(key);let r=null;try{if(!lunarFmt){lunarFmt=new Intl.DateTimeFormat('ko-KR-u-ca-dangi',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric'});if(lunarFmt.resolvedOptions().calendar!=='dangi')lunarFmt=new Intl.DateTimeFormat('ko-KR-u-ca-chinese',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric'});}
@@ -53,14 +57,14 @@
  for(const group of groups){const seen=new Set();for(const x of v[group]){if(!x||!id(x.id)||seen.has(x.id))throw Error('항목 ID가 올바르지 않습니다.');seen.add(x.id);if(['events','tasks','projects','groups'].includes(group)&&(!str(x.title,200)||!x.title.trim()))throw Error('항목 이름이 올바르지 않습니다.');if(['events','tasks','projects','posts'].includes(group)&&!email(x.owner??''))throw Error('작성자 정보가 올바르지 않습니다.');}}
  for(const p of v.projects){if(!['active','paused','done'].includes(p.status)||!str(p.color,20)||!/^#[0-9a-f]{6}$/i.test(p.color)||!optionalDate(p.deadline)||!str(p.notes,4000)||!str(p.url,2000)||(p.url&&!/^https?:\/\//i.test(p.url)))throw Error('프로젝트 데이터가 올바르지 않습니다.');}
  const pids=new Set(v.projects.map(p=>p.id));
- for(const t of v.tasks){if(!['inbox','todo','doing','waiting','done','cancelled'].includes(t.status)||!['high','normal','low'].includes(t.priority)||!optionalDate(t.due)||!str(t.notes,4000)||!str(t.projectId,100)||(t.projectId&&!pids.has(t.projectId))||(t.url!==undefined&&(!str(t.url,2000)||(t.url&&!/^https?:\/\//i.test(t.url)))))throw Error('할 일 데이터가 올바르지 않습니다.');}
- for(const e of v.events){if(!parse(e.date)||!['none','daily','weekly','monthly','yearly','lunarYearly'].includes(e.repeat)||!optionalDate(e.until)||(e.until&&e.until<e.date)||!Array.isArray(e.exceptions)||!e.exceptions.every(x=>!!parse(x))||!str(e.notes,4000)||!str(e.projectId,100)||(e.projectId&&!pids.has(e.projectId))||!str(e.share??'',200)||!str(e.time,5)||!str(e.endTime,5)||![e.time,e.endTime].every(t=>t===''||/^([01]\d|2[0-3]):[0-5]\d$/.test(t))||(e.time&&e.endTime&&e.endTime<=e.time))throw Error('일정 데이터가 올바르지 않습니다.');}
+ for(const t of v.tasks){if(!['inbox','todo','doing','waiting','done','cancelled'].includes(t.status)||!['high','normal','low'].includes(t.priority)||!optionalDate(t.due)||!optionalDate(t.start??'')||(t.start&&t.due&&t.start>t.due)||!str(t.notes,4000)||!str(t.projectId,100)||(t.projectId&&!pids.has(t.projectId))||(t.url!==undefined&&(!str(t.url,2000)||(t.url&&!/^https?:\/\//i.test(t.url)))))throw Error('할 일 데이터가 올바르지 않습니다.');}
+ for(const e of v.events){if(!parse(e.date)||!['none','daily','weekly','monthly','yearly','lunarYearly'].includes(e.repeat)||!optionalDate(e.until)||(e.until&&e.until<e.date)||!Array.isArray(e.exceptions)||!e.exceptions.every(x=>!!parse(x))||!str(e.notes,4000)||!str(e.projectId,100)||(e.projectId&&!pids.has(e.projectId))||!str(e.share??'',200)||!optionalDate(e.endDate??'')||(e.endDate&&(e.endDate<=e.date||e.time||e.endTime||span(e)>366))||!str(e.time,5)||!str(e.endTime,5)||![e.time,e.endTime].every(t=>t===''||/^([01]\d|2[0-3]):[0-5]\d$/.test(t))||(e.time&&e.endTime&&e.endTime<=e.time))throw Error('일정 데이터가 올바르지 않습니다.');}
  for(const g of v.groups){if(!/^#[0-9a-f]{6}$/i.test(g.color)||!Array.isArray(g.members)||g.members.length>500||!g.members.every(m=>email(m)&&m))throw Error('그룹 데이터가 올바르지 않습니다.');}
  for(const m of v.members){if(!email(m.email)||!m.email||m.id!==m.email||!['admin','member'].includes(m.role))throw Error('멤버 데이터가 올바르지 않습니다.');}
  for(const p of v.profiles){if(!email(p.id)||!str(p.name,50))throw Error('프로필 데이터가 올바르지 않습니다.');}
  for(const p of v.posts){if(!str(p.text,4000)||!str(p.createdAt,40)||!Array.isArray(p.files)||p.files.length>10||!p.files.every(f=>f&&id(f.id)&&str(f.thumb??'',200)&&str(f.name,300)&&str(f.mime,200)&&Number.isFinite(f.size)&&typeof f.image==='boolean'))throw Error('게시글 데이터가 올바르지 않습니다.');}
  return JSON.parse(JSON.stringify(v));
  }
- const api={groups,pad,iso,date,parse,days,grid,occurs,blank,normalize,validate,lunar,holidays,holidayNames};
+ const api={span,addDays,groups,pad,iso,date,parse,days,grid,occurs,blank,normalize,validate,lunar,holidays,holidayNames};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.PMS=api;
 })(typeof window!=='undefined'?window:globalThis);
