@@ -14,7 +14,7 @@
  return e.repeat==='yearly'&&d.getDate()===s.getDate()&&d.getMonth()===s.getMonth();}
  const blank=()=>({version:1,events:[],tasks:[],projects:[]});
  function validate(v){
- if(!v||v.version!==1||!['events','tasks','projects'].every(k=>Array.isArray(v[k])&&v[k].length<=20000))throw Error('모아 백업 파일을 선택해주세요.');
+ if(!v||v.version!==1||!['events','tasks','projects'].every(k=>Array.isArray(v[k])&&v[k].length<=20000))throw Error('캘린더 백업 파일을 선택해주세요.');
  const str=(s,max=1000)=>typeof s==='string'&&s.length<=max;
  const id=s=>str(s,100)&&s.length>0;
  const optionalDate=s=>s===''||!!parse(s);
