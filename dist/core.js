@@ -39,19 +39,28 @@
   for(const after of triggers){let k=shift(after,1);while(parse(k).getDay()===0||parse(k).getDay()===6||map.has(k))k=shift(k,1);if(k.startsWith(String(y).padStart(4,'0')+'-'))add(k,'대체공휴일');}}
  holidayCache.set(y,map);return map;}
  function holidayNames(key){const d=parse(key);return d?(holidays(d.getFullYear()).get(key)||[]).map(x=>x.name):[];}
- const blank=()=>({version:1,events:[],tasks:[],projects:[]});
+ const groups=['events','tasks','projects','groups','members','profiles','posts'];
+ const blank=()=>({version:1,...Object.fromEntries(groups.map(k=>[k,[]]))});
+ // Older backups only had events/tasks/projects; fill the shared-space collections in.
+ function normalize(v){if(v&&v.version===1)for(const k of groups)if(v[k]===undefined)v[k]=[];return v;}
  function validate(v){
- if(!v||v.version!==1||!['events','tasks','projects'].every(k=>Array.isArray(v[k])&&v[k].length<=20000))throw Error('캘린더 백업 파일을 선택해주세요.');
+ v=normalize(v);
+ if(!v||v.version!==1||!groups.every(k=>Array.isArray(v[k])&&v[k].length<=20000))throw Error('캘린더 백업 파일을 선택해주세요.');
  const str=(s,max=1000)=>typeof s==='string'&&s.length<=max;
- const id=s=>str(s,100)&&s.length>0;
+ const id=s=>str(s,200)&&s.length>0;
+ const email=s=>str(s,200)&&(s===''||/^[^\s@]+@[^\s@]+$/.test(s));
  const optionalDate=s=>s===''||!!parse(s);
- for(const group of ['events','tasks','projects']){const seen=new Set();for(const x of v[group]){if(!x||!id(x.id)||seen.has(x.id)||!str(x.title,200)||!x.title.trim())throw Error('항목 이름 또는 ID가 올바르지 않습니다.');seen.add(x.id);}}
+ for(const group of groups){const seen=new Set();for(const x of v[group]){if(!x||!id(x.id)||seen.has(x.id))throw Error('항목 ID가 올바르지 않습니다.');seen.add(x.id);if(['events','tasks','projects','groups'].includes(group)&&(!str(x.title,200)||!x.title.trim()))throw Error('항목 이름이 올바르지 않습니다.');if(['events','tasks','projects','posts'].includes(group)&&!email(x.owner??''))throw Error('작성자 정보가 올바르지 않습니다.');}}
  for(const p of v.projects){if(!['active','paused','done'].includes(p.status)||!str(p.color,20)||!/^#[0-9a-f]{6}$/i.test(p.color)||!optionalDate(p.deadline)||!str(p.notes,4000)||!str(p.url,2000)||(p.url&&!/^https?:\/\//i.test(p.url)))throw Error('프로젝트 데이터가 올바르지 않습니다.');}
  const pids=new Set(v.projects.map(p=>p.id));
  for(const t of v.tasks){if(!['inbox','todo','doing','waiting','done','cancelled'].includes(t.status)||!['high','normal','low'].includes(t.priority)||!optionalDate(t.due)||!str(t.notes,4000)||!str(t.projectId,100)||(t.projectId&&!pids.has(t.projectId))||(t.url!==undefined&&(!str(t.url,2000)||(t.url&&!/^https?:\/\//i.test(t.url)))))throw Error('할 일 데이터가 올바르지 않습니다.');}
- for(const e of v.events){if(!parse(e.date)||!['none','daily','weekly','monthly','yearly','lunarYearly'].includes(e.repeat)||!optionalDate(e.until)||(e.until&&e.until<e.date)||!Array.isArray(e.exceptions)||!e.exceptions.every(x=>!!parse(x))||!str(e.notes,4000)||!str(e.projectId,100)||(e.projectId&&!pids.has(e.projectId))||!str(e.time,5)||!str(e.endTime,5)||![e.time,e.endTime].every(t=>t===''||/^([01]\d|2[0-3]):[0-5]\d$/.test(t))||(e.time&&e.endTime&&e.endTime<=e.time))throw Error('일정 데이터가 올바르지 않습니다.');}
+ for(const e of v.events){if(!parse(e.date)||!['none','daily','weekly','monthly','yearly','lunarYearly'].includes(e.repeat)||!optionalDate(e.until)||(e.until&&e.until<e.date)||!Array.isArray(e.exceptions)||!e.exceptions.every(x=>!!parse(x))||!str(e.notes,4000)||!str(e.projectId,100)||(e.projectId&&!pids.has(e.projectId))||!str(e.share??'',200)||!str(e.time,5)||!str(e.endTime,5)||![e.time,e.endTime].every(t=>t===''||/^([01]\d|2[0-3]):[0-5]\d$/.test(t))||(e.time&&e.endTime&&e.endTime<=e.time))throw Error('일정 데이터가 올바르지 않습니다.');}
+ for(const g of v.groups){if(!/^#[0-9a-f]{6}$/i.test(g.color)||!Array.isArray(g.members)||g.members.length>500||!g.members.every(m=>email(m)&&m))throw Error('그룹 데이터가 올바르지 않습니다.');}
+ for(const m of v.members){if(!email(m.email)||!m.email||m.id!==m.email||!['admin','member'].includes(m.role))throw Error('멤버 데이터가 올바르지 않습니다.');}
+ for(const p of v.profiles){if(!email(p.id)||!str(p.name,50))throw Error('프로필 데이터가 올바르지 않습니다.');}
+ for(const p of v.posts){if(!str(p.text,4000)||!str(p.createdAt,40)||!Array.isArray(p.files)||p.files.length>10||!p.files.every(f=>f&&id(f.id)&&str(f.thumb??'',200)&&str(f.name,300)&&str(f.mime,200)&&Number.isFinite(f.size)&&typeof f.image==='boolean'))throw Error('게시글 데이터가 올바르지 않습니다.');}
  return JSON.parse(JSON.stringify(v));
  }
- const api={pad,iso,date,parse,days,grid,occurs,blank,validate,lunar,holidays,holidayNames};
+ const api={groups,pad,iso,date,parse,days,grid,occurs,blank,normalize,validate,lunar,holidays,holidayNames};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.PMS=api;
 })(typeof window!=='undefined'?window:globalThis);
